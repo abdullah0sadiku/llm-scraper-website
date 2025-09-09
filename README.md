@@ -6,6 +6,7 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 
 ### Core Functionality
 - **AI-Powered Analysis**: Uses OpenAI to analyze webpage structure and generate extraction scripts
+- **Manual JSON Schema Editor**: NEW! Direct JSON editing with real-time validation and dual-mode interface
 - **Custom Schema Builder**: Intuitive drag-and-drop interface for defining data structure
 - **Real-time Scraping**: WebSocket-based progress updates and live job monitoring
 - **Script Generation**: Automatic Playwright script generation based on webpage analysis
@@ -20,6 +21,9 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 - **Template System**: Pre-built templates for common scraping patterns
 
 ### Advanced Features
+- **🆕 Dual-Mode Schema Editor**: Switch between Visual Builder and Manual JSON Editor
+- **🆕 Real-time JSON Validation**: Live syntax checking and schema validation
+- **🆕 Professional JSON Editor**: Syntax highlighting, error indicators, and line counting
 - **Schema Suggestions**: AI automatically suggests optimal data schemas
 - **URL Validation**: Pre-flight checks to ensure target websites are accessible
 - **Export Options**: Download results as JSON or CSV
@@ -34,6 +38,7 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 - **AI Integration**: OpenAI GPT-4 for webpage analysis and script generation
 - **Web Scraping**: Playwright (Python) for reliable browser automation
 - **Real-time Updates**: WebSocket connections for live progress tracking
+- **Containerization**: Docker with Docker Compose for easy deployment
 
 ## 🚀 Quick Start
 
@@ -43,52 +48,65 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 - Docker Desktop
 - OpenAI API Key
 
-### Setup Instructions
+### Docker Setup (Recommended)
 
-1. **Create environment file**
-   ```bash
-   cp env.example .env
-   ```
-   Edit `.env` and add your OpenAI API key:
-   ```
-   OPENAI_API_KEY=your_openai_api_key_here
-   ```
+1. **Clone the repository**
+```bash
+git clone https://github.com/abdullah0sadiku/llm-scraper-website.git
+cd llm-scraper-website
+```
 
-2. **Start Database**
-   ```bash
-   docker-compose up -d
-   ```
+2. **Create environment file**
+```bash
+cp env.example .env
+```
+Edit `.env` and add your OpenAI API key:
+```
+OPENAI_API_KEY=your_openai_api_key_here
+```
 
-3. **Install Backend Dependencies**
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   playwright install chromium
-   ```
-
-4. **Install Frontend Dependencies**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-5. **Start Backend** (in one terminal)
-   ```bash
-   cd backend
-   python main.py
-   ```
-
-6. **Start Frontend** (in another terminal)
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+3. **Start all services with Docker**
+```bash
+docker-compose up --build
+```
 
 ### Access Points
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **pgAdmin**: http://localhost:5050 (admin@llmscraper.com / admin123)
+- **Frontend**: http://localhost:8020 🎯
+- **Backend API**: http://localhost:3020 🔧
+- **API Docs**: http://localhost:3020/docs 📚
+- **pgAdmin**: http://localhost:9876 🗄️ (admin@llmscraper.com / admin123)
+
+### Manual Setup (Alternative)
+
+1. **Start Database**
+```bash
+docker-compose up -d postgres pgadmin
+```
+
+2. **Install Backend Dependencies**
+```bash
+cd backend
+pip install -r requirements.txt
+playwright install chromium
+```
+
+3. **Install Frontend Dependencies**
+```bash
+cd frontend
+npm install
+```
+
+4. **Start Backend** (in one terminal)
+```bash
+cd backend
+python main.py
+```
+
+5. **Start Frontend** (in another terminal)
+```bash
+cd frontend
+npm run dev
+```
 
 ## 📖 Usage Guide
 
@@ -96,13 +114,50 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 
 1. **Navigate to "New Job"** from the dashboard
 2. **Enter Target URL** (e.g., https://news.ycombinator.com)
-3. **Define Schema** using the visual builder:
-   - Choose Array (multiple items) or Object (single item)
-   - Add fields you want to extract
-   - Use AI suggestions for optimal schemas
+3. **Define Schema** using either:
+   - **Visual Builder**: Drag-and-drop interface
+   - **🆕 Manual JSON Editor**: Direct JSON editing with validation
 4. **Create Job** - AI generates and executes Playwright script
 5. **Monitor Progress** with real-time WebSocket updates
 6. **View Results** and export as JSON/CSV
+
+### 🆕 Manual JSON Schema Editor
+
+The new manual editor allows power users to:
+- **Edit JSON directly** with syntax highlighting
+- **Real-time validation** with error indicators
+- **Switch modes** between Visual and JSON editing
+- **Copy-paste schemas** from external sources
+- **Professional editor experience** with line counting and formatting
+
+#### Example: E-commerce Product Schema
+```json
+{
+  "type": "array",
+  "items": {
+    "product_name": {
+      "type": "string",
+      "required": true,
+      "description": "Product name"
+    },
+    "price": {
+      "type": "string", 
+      "required": true,
+      "description": "Product price with currency"
+    },
+    "image_url": {
+      "type": "string",
+      "required": false,
+      "description": "Product image URL"
+    },
+    "availability": {
+      "type": "string",
+      "required": false,
+      "description": "Stock status"
+    }
+  }
+}
+```
 
 ### Example Schemas
 
@@ -111,25 +166,24 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 {
   "type": "array",
   "items": {
-    "title": "string",
-    "content": "string", 
-    "author": "string",
-    "date": "string",
-    "url": "string"
+    "title": {"type": "string", "required": true},
+    "content": {"type": "string", "required": false},
+    "author": {"type": "string", "required": false},
+    "date": {"type": "string", "required": false},
+    "url": {"type": "string", "required": false}
   }
 }
 ```
 
-**Product Listings:**
+**Contact Information:**
 ```json
 {
-  "type": "array",
-  "items": {
-    "name": "string",
-    "price": "string",
-    "description": "string",
-    "image": "string",
-    "rating": "string"
+  "type": "object",
+  "properties": {
+    "company_name": {"type": "string", "required": true},
+    "address": {"type": "string", "required": false},
+    "phone": {"type": "string", "required": false},
+    "email": {"type": "string", "required": false}
   }
 }
 ```
@@ -145,7 +199,7 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 
 ### Frontend Components
 - **Dashboard**: Job overview and statistics
-- **Job Creator**: URL input and schema builder
+- **Job Creator**: URL input and dual-mode schema builder
 - **Job Manager**: List and manage all jobs
 - **Results Viewer**: Display and export extracted data
 - **Script Viewer**: Generated Playwright scripts with syntax highlighting
@@ -153,10 +207,10 @@ An AI-powered web application that replicates the functionality of the [LLM Scra
 ### Database Schema
 ```sql
 -- Core tables for job management
-scraping_jobs        -- Job metadata and status
-generated_scripts    -- AI-generated Playwright scripts  
-extracted_data       -- Scraped results
-script_templates     -- Reusable extraction patterns
+scraping_jobs       -- Job metadata and status
+generated_scripts   -- AI-generated Playwright scripts
+extracted_data      -- Scraped results
+script_templates    -- Reusable extraction patterns
 ```
 
 ## 🔧 Development
@@ -183,12 +237,19 @@ LLM_generator/
 │   └── vite.config.ts
 ├── database/              # Database setup
 │   └── init.sql          # Schema initialization
-├── docker-compose.yml     # Development environment
-├── start.py              # Automated startup script
+├── docker-compose.yml     # Docker services
+├── DOCKER_SETUP.md       # Docker documentation
+├── MANUAL_SCHEMA_EDITOR.md # Manual editor guide
 └── SETUP.md              # Detailed setup guide
 ```
 
 ### Key Features Implementation
+
+**🆕 Manual JSON Editor:**
+- Real-time JSON validation with Zod schemas
+- Bidirectional synchronization between visual and JSON modes
+- Professional editor experience with syntax highlighting
+- Error handling and user-friendly validation messages
 
 **AI Integration:**
 - OpenAI GPT-4 for HTML analysis and script generation
@@ -211,7 +272,8 @@ LLM_generator/
 - **Docker not running**: Ensure Docker Desktop is installed and running
 - **OpenAI API errors**: Check your API key in the `.env` file
 - **Database connection**: Wait 30-60 seconds for PostgreSQL to fully start
-- **Port conflicts**: Ensure ports 3000, 8000, and 5432 are available
+- **Port conflicts**: Ensure ports 8020, 3020, 7543, 9876, and 4321 are available
+- **CORS errors**: The latest version includes comprehensive CORS configuration
 
 ### Debug Information
 - Backend logs: Check terminal output or `scraper.log`
@@ -220,9 +282,21 @@ LLM_generator/
 
 ## 📚 Documentation
 
+- **Docker Setup Guide**: [DOCKER_SETUP.md](DOCKER_SETUP.md) - Complete Docker deployment guide
+- **Manual Editor Guide**: [MANUAL_SCHEMA_EDITOR.md](MANUAL_SCHEMA_EDITOR.md) - Comprehensive manual editor documentation
 - **Setup Guide**: [SETUP.md](SETUP.md) - Detailed installation instructions
-- **API Documentation**: http://localhost:8000/docs (when running)
+- **API Documentation**: http://localhost:3020/docs (when running)
 - **Database Schema**: See `database/init.sql`
+
+## 🆕 What's New
+
+### Version 2.0 Features
+- **Manual JSON Schema Editor** with real-time validation
+- **Dual-mode interface** (Visual + JSON editing)
+- **Docker deployment** with custom ports
+- **Enhanced CORS support** for cross-origin requests
+- **Professional editor experience** with syntax highlighting
+- **Improved error handling** and user feedback
 
 ## 🤝 Contributing
 
@@ -244,6 +318,11 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Ready to start scraping?** Follow the setup instructions above and visit http://localhost:3000!
-#   l l m - s c r a p e r - w e b s i t e  
- 
+**Ready to start scraping?** 🚀
+
+1. Clone this repository
+2. Follow the Docker setup instructions
+3. Visit http://localhost:8020
+4. Try the new manual JSON editor feature!
+
+**Need help?** Check out our comprehensive documentation or open an issue!

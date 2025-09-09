@@ -1,0 +1,92 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: llm_scraper_db
+    environment:
+      POSTGRES_USER: llm_scraper_user
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_DB: llm_scraper_db
+    ports:
+      - "7543:5432"  # Unusual port for postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - llm_scraper_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llm_scraper_user -d llm_scraper_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: llm_scraper_backend
+    environment:
+      POSTGRES_USER: llm_scraper_user
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_DB: llm_scraper_db
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DEBUG: true
+    ports:
+      - "3020:8000"  # Backend on port 3020 as requested
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - llm_scraper_network
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: llm_scraper_frontend
+    ports:
+      - "8020:3000"  # Frontend on port 8020 as requested, internal port 3000
+    depends_on:
+      - backend
+    networks:
+      - llm_scraper_network
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=http://localhost:3020
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: llm_scraper_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@llmscraper.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "9876:80"  # Unusual port for pgAdmin
+    depends_on:
+      - postgres
+    networks:
+      - llm_scraper_network
+
+  # Redis for job queue (optional for future use)
+  redis:
+    image: redis:7-alpine
+    container_name: llm_scraper_redis
+    ports:
+      - "4321:6379"  # Unusual port for redis
+    networks:
+      - llm_scraper_network
+
+volumes:
+  postgres_data:
+
+networks:
+  llm_scraper_network:
+    driver: bridge

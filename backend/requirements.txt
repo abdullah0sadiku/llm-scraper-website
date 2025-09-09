@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+asyncpg
+pydantic
+pydantic-settings
+python-multipart
+aiofiles
+passlib
+openai
+playwright
+beautifulsoup4
+requests
+websockets
+python-dotenv
+httpx
+jinja2
